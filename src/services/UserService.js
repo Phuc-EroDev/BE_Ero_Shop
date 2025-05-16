@@ -115,10 +115,49 @@ const deleteUser = (id) => {
                 })
             }
 
-            // await UserModel.findByIdAndDelete(id);
+            await UserModel.findByIdAndDelete(id);
             resolve({
                 status: "OK",
                 message: "Delete user Success",
+            })
+        } catch (err) {
+            reject(err);
+        }
+    })
+}
+
+const getAllUser = () => {
+    return new Promise(async (resolve, reject) => {
+        try {
+            const allUser = await UserModel.find();
+            resolve({
+                status: "OK",
+                message: "Success",
+                data: allUser,
+            })
+        } catch (err) {
+            reject(err);
+        }
+    })
+}
+
+const getDetailsUser = (id) => {
+    return new Promise(async (resolve, reject) => {
+        try {
+            const user = await UserModel.findOne({ 
+                _id: id
+             })
+            if (user === null) {
+                resolve({
+                    status: "OK",
+                    message: "The User is not found",
+                })
+            }
+
+            resolve({
+                status: "OK",
+                message: "Success",
+                data: user,
             })
         } catch (err) {
             reject(err);
@@ -130,5 +169,7 @@ module.exports = {
     createUser,
     loginUser,
     updateUser,
-    deleteUser
+    deleteUser,
+    getAllUser,
+    getDetailsUser
 };
