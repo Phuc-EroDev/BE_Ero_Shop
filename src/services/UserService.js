@@ -1,4 +1,6 @@
 const UserModel = require('../models/UserModel');
+const bcrypt = require('bcrypt');
+const { genneralAccessToken, genneralRefreshToken } = require('./JwtService');
 
 const createUser = (newUser) => {
     return new Promise(async (resolve, reject) => {
@@ -13,11 +15,11 @@ const createUser = (newUser) => {
                     message: "The Email is already",
                 })
             }
+            const hash = bcrypt.hashSync(password, 10);
             const createdUser = await UserModel.create({
                 name,
                 email,
-                password,
-                confirmPassword,
+                password: hash,
                 phone
             });
             if (createdUser) {
@@ -28,12 +30,54 @@ const createUser = (newUser) => {
                 })
             }
         } catch (err) {
-            console.log(err);
+            reject(err);
+        }
+    })
+}
+
+const loginUser = (userLogin) => {
+    return new Promise(async (resolve, reject) => {
+        const { name, email, password, confirmPassword, phone } = userLogin;
+        try {
+            const checkUser = await UserModel.findOne({
+                email: email
+            })
+            if (checkUser === null) {
+                resolve({
+                    status: "OK",
+                    message: "The User is not found",
+                })
+            }
+            const comparePassword = bcrypt.compareSync(password, checkUser.password)
+
+            if (!comparePassword) {
+                resolve({
+                    status: "OK",
+                    message: "The Password or User is not correct",
+                })
+            }
+            const access_token = await genneralAccessToken({
+                id: checkUser.id,
+                isAdmin: checkUser.isAdmin
+            })
+            const refresh_token = await genneralRefreshToken({
+                id: checkUser.id,
+                isAdmin: checkUser.isAdmin
+            })
+
+            resolve({
+                status: "OK",
+                message: "Success",
+                access_token,
+                refresh_token,
+            })
+        } catch (err) {
             reject(err);
         }
     })
 }
 
 module.exports = {
-    createUser
+    createUser,
+    loginUser
 };
