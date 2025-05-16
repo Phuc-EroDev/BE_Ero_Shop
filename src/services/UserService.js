@@ -77,7 +77,33 @@ const loginUser = (userLogin) => {
     })
 }
 
+const updateUser = (id, data) => {
+    return new Promise(async (resolve, reject) => {
+        try {
+            const checkUser = await UserModel.findOne({ 
+                _id: id
+             })
+            if (checkUser === null) {
+                resolve({
+                    status: "OK",
+                    message: "The User is not found",
+                })
+            }
+
+            const updatedUser = await UserModel.findByIdAndUpdate(id, data, { new: true });
+            resolve({
+                status: "OK",
+                message: "Success",
+                data: updatedUser,
+            })
+        } catch (err) {
+            reject(err);
+        }
+    })
+}
+
 module.exports = {
     createUser,
-    loginUser
+    loginUser,
+    updateUser
 };
