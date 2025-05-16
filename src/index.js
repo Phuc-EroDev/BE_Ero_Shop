@@ -1,17 +1,19 @@
 const express = require('express');
 const dotenv = require('dotenv');
 const  mongoose = require('mongoose');
+const routes = require('./routes');
+const bodyParser = require('body-parser');
 
 dotenv.config();
 
 const app = express();
 const port = process.env.PORT || 3001;
 
-app.get('/', (req, res) => {
-  res.send('Hello World!')
-});
+app.use(bodyParser.json());
 
-mongoose.connect(`mongodb+srv://phucvo140902:${process.env.MONGO_DB}@erodb.ri4bf8p.mongodb.net/?retryWrites=true&w=majority&appName=EroDB`)
+routes(app);
+
+mongoose.connect(`${process.env.MONGO_DB}`)
 .then(() => {
     console.log('Connected DB Success !!!')
 })
