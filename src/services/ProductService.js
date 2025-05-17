@@ -35,7 +35,33 @@ const createProduct = (newProduct) => {
     })
 }
 
+const updateProduct = (id, data) => {
+    return new Promise(async (resolve, reject) => {
+        try {
+            const checkProduct = await ProductModel.findOne({ 
+                _id: id
+             })
+            if (checkProduct === null) {
+                resolve({
+                    status: "OK",
+                    message: "The Product is not found",
+                })
+            }
+
+            const updatedProduct = await ProductModel.findByIdAndUpdate(id, data, { new: true });
+            resolve({
+                status: "OK",
+                message: "Success",
+                data: updatedProduct,
+            })
+        } catch (err) {
+            reject(err);
+        }
+    })
+}
+
 
 module.exports = {
     createProduct,
+    updateProduct
 };
