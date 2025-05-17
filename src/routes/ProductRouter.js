@@ -4,6 +4,7 @@ const ProductController = require('../controllers/ProductController');
 const { authMiddleware } = require('../middleware/authMiddleware');
 
 router.post('/create', ProductController.createProduct);
-router.post('/update/:id', authMiddleware, ProductController.updateProduct);
+router.put('/update/:id', authMiddleware, ProductController.updateProduct);
+router.get('/get-details/:id', ProductController.getDetailsProduct);
 
 module.exports = router;

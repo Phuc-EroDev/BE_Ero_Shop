@@ -60,8 +60,33 @@ const updateProduct = (id, data) => {
     })
 }
 
+const getDetailsProduct = (id) => {
+    return new Promise(async (resolve, reject) => {
+        try {
+            const product = await ProductModel.findOne({ 
+                _id: id
+             })
+            if (product === null) {
+                resolve({
+                    status: "OK",
+                    message: "The Product is not found",
+                })
+            }
+
+            resolve({
+                status: "OK",
+                message: "Success",
+                data: product,
+            })
+        } catch (err) {
+            reject(err);
+        }
+    })
+}
+
 
 module.exports = {
     createProduct,
-    updateProduct
+    updateProduct,
+    getDetailsProduct
 };
