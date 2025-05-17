@@ -84,6 +84,21 @@ const getDetailsProduct = (id) => {
     })
 }
 
+const getAllProduct = () => {
+    return new Promise(async (resolve, reject) => {
+        try {
+            const allProduct = await ProductModel.find();
+            resolve({
+                status: "OK",
+                message: "Success",
+                data: allProduct,
+            })
+        } catch (err) {
+            reject(err);
+        }
+    })
+}
+
 const deleteProduct = (id) => {
     return new Promise(async (resolve, reject) => {
         try {
@@ -113,5 +128,6 @@ module.exports = {
     createProduct,
     updateProduct,
     getDetailsProduct,
+    getAllProduct,
     deleteProduct
 };
