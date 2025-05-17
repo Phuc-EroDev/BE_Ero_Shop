@@ -84,9 +84,34 @@ const getDetailsProduct = (id) => {
     })
 }
 
+const deleteProduct = (id) => {
+    return new Promise(async (resolve, reject) => {
+        try {
+            const checkProduct = await ProductModel.findOne({ 
+                _id: id
+             })
+            if (checkProduct === null) {
+                resolve({
+                    status: "OK",
+                    message: "The Product is not found",
+                })
+            }
+
+            await ProductModel.findByIdAndDelete(id);
+            resolve({
+                status: "OK",
+                message: "Delete product Success",
+            })
+        } catch (err) {
+            reject(err);
+        }
+    })
+}
+
 
 module.exports = {
     createProduct,
     updateProduct,
-    getDetailsProduct
+    getDetailsProduct,
+    deleteProduct
 };
