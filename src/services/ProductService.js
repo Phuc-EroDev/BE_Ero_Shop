@@ -84,11 +84,26 @@ const getDetailsProduct = (id) => {
     })
 }
 
-const getAllProduct = (limit = 8, page = 0) => {
+const getAllProduct = (limit = 8, page = 0, sort) => {
     return new Promise(async (resolve, reject) => {
         try {
-            const totalProduct = await ProductModel.countDocuments()
-            const allProduct = await ProductModel.find().limit(limit).skip(page * limit);
+            const totalProduct = await ProductModel.countDocuments();
+            if (sort) {
+                const objectSort = {};
+                objectSort[sort[1]] = sort[0];
+                const allProductSort = await ProductModel.find().limit(limit).skip(page * limit).sort(objectSort);
+                resolve({
+                status: "OK",
+                message: "Success",
+                data: allProductSort,
+                total: totalProduct,
+                pageCurrent: parseInt(page) + 1,
+                totalPage: Math.ceil(totalProduct / limit),
+                })
+            }
+            const allProduct = await ProductModel.find().limit(limit).skip(page * limit).sort({
+                name: sort
+            });
             resolve({
                 status: "OK",
                 message: "Success",
