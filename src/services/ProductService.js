@@ -84,26 +84,52 @@ const getDetailsProduct = (id) => {
     })
 }
 
-const getAllProduct = (limit = 8, page = 0, sort) => {
+const getAllProduct = (limit = 8, page = 0, sort, filter) => {
     return new Promise(async (resolve, reject) => {
         try {
             const totalProduct = await ProductModel.countDocuments();
+            if (sort && filter) {
+                const objectSort = {};
+                objectSort[sort[1]] = sort[0];
+                const objectFilter = {};
+                objectFilter[filter[0]] = { '$regex': filter[1], $options: 'i' };
+                const allProductSortFilter = await ProductModel.find(objectFilter).limit(limit).skip(page * limit).sort(objectSort);
+                return resolve({
+                    status: "OK",
+                    message: "Success",
+                    data: allProductSortFilter,
+                    total: totalProduct,
+                    pageCurrent: parseInt(page) + 1,
+                    totalPage: Math.ceil(totalProduct / limit),
+                })
+            }
+            if (filter) {
+                const objectFilter = {};
+                objectFilter[filter[0]] = { '$regex': filter[1], $options: 'i' };
+                const allProductFilter = await ProductModel.find(objectFilter).limit(limit).skip(page * limit);
+                return resolve({
+                    status: "OK",
+                    message: "Success",
+                    data: allProductFilter,
+                    total: totalProduct,
+                    pageCurrent: parseInt(page) + 1,
+                    totalPage: Math.ceil(totalProduct / limit),
+                })
+            }
             if (sort) {
                 const objectSort = {};
                 objectSort[sort[1]] = sort[0];
                 const allProductSort = await ProductModel.find().limit(limit).skip(page * limit).sort(objectSort);
-                resolve({
-                status: "OK",
-                message: "Success",
-                data: allProductSort,
-                total: totalProduct,
-                pageCurrent: parseInt(page) + 1,
-                totalPage: Math.ceil(totalProduct / limit),
+                return resolve({
+                    status: "OK",
+                    message: "Success",
+                    data: allProductSort,
+                    total: totalProduct,
+                    pageCurrent: parseInt(page) + 1,
+                    totalPage: Math.ceil(totalProduct / limit),
                 })
             }
-            const allProduct = await ProductModel.find().limit(limit).skip(page * limit).sort({
-                name: sort
-            });
+            const allProduct = await ProductModel.find().limit(limit).skip(page * limit);
             resolve({
                 status: "OK",
                 message: "Success",
