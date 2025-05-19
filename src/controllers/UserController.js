@@ -6,19 +6,19 @@ const createUser = async(req, res) => {
         const { name, email, password, confirmPassword, phone } = req.body;
         const reg = /^(([^<>()[\]\.,;:\s@\"]+(\.[^<>()[\]\.,;:\s@\"]+)*)|(\".+\"))@(([^<>()[\]\.,;:\s@\"]+\.)+[^<>()[\]\.,;:\s@\"]{2,})$/i;
         const isValidEmail = reg.test(email);
-        if(!name || !email || !password || !confirmPassword || !phone) {
+        if(!email || !password || !confirmPassword) {
             return res.status(200).json({ 
-                status: "Error",
+                status: "ERR",
                 message: "Please fill all the fields"
              });
         } else if (!isValidEmail) {
             return res.status(200).json({ 
-                status: "Error",
+                status: "ERR",
                 message: "Email is not valid"
              });
         } else if (password !== confirmPassword) {
             return res.status(200).json({ 
-                status: "Error",
+                status: "ERR",
                 message: "Passwords do not match"
             });
         }
@@ -32,24 +32,19 @@ const createUser = async(req, res) => {
 
 const loginUser = async(req, res) => {
     try {
-        const { name, email, password, confirmPassword, phone } = req.body;
+        const { email, password } = req.body;
         const reg = /^(([^<>()[\]\.,;:\s@\"]+(\.[^<>()[\]\.,;:\s@\"]+)*)|(\".+\"))@(([^<>()[\]\.,;:\s@\"]+\.)+[^<>()[\]\.,;:\s@\"]{2,})$/i;
         const isValidEmail = reg.test(email);
-        if(!name || !email || !password || !confirmPassword || !phone) {
+        if(!email || !password) {
             return res.status(200).json({ 
-                status: "Error",
+                status: "ERR",
                 message: "Please fill all the fields"
              });
         } else if (!isValidEmail) {
             return res.status(200).json({ 
-                status: "Error",
+                status: "ERR",
                 message: "Email is not valid"
              });
-        } else if (password !== confirmPassword) {
-            return res.status(200).json({ 
-                status: "Error",
-                message: "Passwords do not match"
-            });
         }
         const data = await UserService.loginUser(req.body);
         return res.status(200).json(data);
