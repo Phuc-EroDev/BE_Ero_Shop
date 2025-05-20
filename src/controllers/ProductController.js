@@ -4,7 +4,7 @@ const createProduct = async(req, res) => {
     try {
         const { name, image, type, price, countInStock, rating, description } = req.body;
         if(!name || !image || !type || !price || !countInStock || !rating ) {
-            return res.status(200).json({ 
+            return res.status(400).json({ 
                 status: "Error",
                 message: "Please fill all the fields"
              });
@@ -13,7 +13,7 @@ const createProduct = async(req, res) => {
         return res.status(200).json(response);
     } catch (err) {
         console.log(err);
-        return res.status(404).json({ message: err });
+        return res.status(500).json({ message: err });
     }
 }
 
@@ -22,7 +22,7 @@ const updateProduct = async(req, res) => {
         const productId = req.params.id;
         const data = req.body;
         if (!productId) {
-            return res.status(200).json({ 
+            return res.status(400).json({ 
                 status: "Error",
                 message: "The productId is required"
              });
@@ -30,7 +30,7 @@ const updateProduct = async(req, res) => {
         const response = await ProductService.updateProduct(productId, data);
         return res.status(200).json(response);
     } catch (err) {
-        return res.status(404).json({ message: err });
+        return res.status(500).json({ message: err });
     }
 }
 
@@ -38,7 +38,7 @@ const getDetailsProduct = async(req, res) => {
     try {
         const productId = req.params.id;
         if (!productId) {
-            return res.status(200).json({ 
+            return res.status(400).json({ 
                 status: "Error",
                 message: "The productId is required"
              });
@@ -46,7 +46,7 @@ const getDetailsProduct = async(req, res) => {
         const response = await ProductService.getDetailsProduct(productId);
         return res.status(200).json(response);
     } catch (err) {
-        return res.status(404).json({ message: err });
+        return res.status(500).json({ message: err });
     }
 }
 
@@ -56,7 +56,7 @@ const getAllProduct = async(req, res) => {
         const response = await ProductService.getAllProduct(limit , page, sort, filter);
         return res.status(200).json(response);
     } catch (err) {
-        return res.status(404).json({ message: err });
+        return res.status(500).json({ message: err });
     }
 }
 
@@ -64,7 +64,7 @@ const deleteProduct = async(req, res) => {
     try {
         const productId = req.params.id;
         if (!productId) {
-            return res.status(200).json({ 
+            return res.status(400).json({ 
                 status: "Error",
                 message: "The productId is required"
              });
@@ -72,7 +72,7 @@ const deleteProduct = async(req, res) => {
         const response = await ProductService.deleteProduct(productId);
         return res.status(200).json(response);
     } catch (err) {
-        return res.status(404).json({ message: err });
+        return res.status(500).json({ message: err });
     }
 }
 
