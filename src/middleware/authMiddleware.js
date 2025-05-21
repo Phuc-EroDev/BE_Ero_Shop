@@ -32,7 +32,6 @@ const authUserMiddleware = (req, res, next) => {
                 status: "Error",
             })
         }
-        console.log(user)
         if (user?.isAdmin || user?.id === userId) {
             next();
         } else {
