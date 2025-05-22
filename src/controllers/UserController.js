@@ -59,6 +59,18 @@ const loginUser = async(req, res) => {
     }
 }
 
+const logoutUser = async(req, res) => {
+    try {
+        res.clearCookie('refresh_token')
+        return res.status(200).json({
+            status: 'OK',
+            message: 'Logout Success'
+        });
+    } catch (err) {
+        return res.status(500).json({ message: err });
+    }
+}
+
 const updateUser = async(req, res) => {
     try {
         const userId = req.params.id;
@@ -136,6 +148,7 @@ const refreshToken = async(req, res) => {
 module.exports = {
     createUser,
     loginUser,
+    logoutUser,
     updateUser,
     deleteUser,
     getAllUser,
