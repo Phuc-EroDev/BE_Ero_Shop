@@ -46,6 +46,7 @@ const updateProduct = (id, data) => {
                     status: "OK",
                     message: "The Product is not found",
                 })
+                return;
             }
 
             const updatedProduct = await ProductModel.findByIdAndUpdate(id, data, { new: true });
@@ -168,11 +169,26 @@ const deleteProduct = (id) => {
     })
 }
 
+const deleteManyProduct = (ids) => {
+    return new Promise(async (resolve, reject) => {
+        try {
+            await ProductModel.deleteMany({_id: {$in: ids}});
+            resolve({
+                status: "OK",
+                message: "Delete many product Success",
+            })
+        } catch (err) {
+            reject(err);
+        }
+    })
+}
+
 
 module.exports = {
     createProduct,
     updateProduct,
     getDetailsProduct,
     getAllProduct,
-    deleteProduct
+    deleteProduct,
+    deleteManyProduct
 };
