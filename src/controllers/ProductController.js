@@ -50,6 +50,15 @@ const getDetailsProduct = async(req, res) => {
     }
 }
 
+const getAllTypeProduct = async(req, res) => {
+    try {
+        const response = await ProductService.getAllTypeProduct();
+        return res.status(200).json(response);
+    } catch (err) {
+        return res.status(500).json({ message: err });
+    }
+}
+
 const getAllProduct = async(req, res) => {
     try {
         const { limit , page, sort, filter } = req.query;
@@ -98,6 +107,7 @@ module.exports = {
     createProduct,
     updateProduct,
     getDetailsProduct,
+    getAllTypeProduct,
     getAllProduct,
     deleteProduct,
     deleteManyProduct
