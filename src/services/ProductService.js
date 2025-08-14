@@ -9,7 +9,7 @@ const createProduct = (newProduct) => {
       });
       if (checkProduct !== null) {
         resolve({
-          status: 'OK',
+          status: 'ERR',
           message: 'The name of product is already',
         });
       }

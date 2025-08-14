@@ -3,7 +3,19 @@ const OrderService = require('../services/OrderService');
 const createOrder = async (req, res) => {
   try {
     const { fullName, address, city, phone, paymentMethod, itemsPrice, shippingPrice, totalPrice } = req.body;
-    if (!fullName || !address || !city || !phone || !paymentMethod || !itemsPrice || !shippingPrice || !totalPrice) {
+    if (
+      !fullName ||
+      !address ||
+      !city ||
+      !phone ||
+      !paymentMethod ||
+      typeof itemsPrice !== 'number' ||
+      itemsPrice < 0 ||
+      typeof shippingPrice !== 'number' ||
+      shippingPrice < 0 ||
+      typeof totalPrice !== 'number' ||
+      totalPrice < 0
+    ) {
       return res.status(400).json({
         status: 'Error',
         message: 'Please fill all the fields',
@@ -17,6 +29,23 @@ const createOrder = async (req, res) => {
   }
 };
 
+const getOrderDetails = async (req, res) => {
+  try {
+    const userId = req.params.id;
+    if (!userId) {
+      return res.status(400).json({
+        status: 'Error',
+        message: 'The userId is required',
+      });
+    }
+    const response = await OrderService.getOrderDetails(userId);
+    return res.status(200).json(response);
+  } catch (err) {
+    return res.status(500).json({ message: err });
+  }
+};
+
 module.exports = {
   createOrder,
+  getOrderDetails,
 };
