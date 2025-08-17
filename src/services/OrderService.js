@@ -21,7 +21,6 @@ const createOrder = (newOrder) => {
           { new: true },
         );
 
-        console.log('Product data after update:', productData);
         if (productData) {
           const createdOrder = await OrderModel.create({
             orderItems,
@@ -93,7 +92,30 @@ const getOrderDetails = (id) => {
   });
 };
 
+const cancelOrder = (id) => {
+  return new Promise(async (resolve, reject) => {
+    try {
+      const order = await OrderModel.findByIdAndDelete(id);
+      if (order === null) {
+        resolve({
+          status: 'OK',
+          message: 'The Order is not defined',
+        });
+      }
+
+      resolve({
+        status: 'OK',
+        message: 'Success',
+        data: order,
+      });
+    } catch (err) {
+      reject(err);
+    }
+  });
+};
+
 module.exports = {
   createOrder,
   getOrderDetails,
+  cancelOrder,
 };
