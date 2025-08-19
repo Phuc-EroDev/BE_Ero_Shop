@@ -92,20 +92,52 @@ const getOrderDetails = (id) => {
   });
 };
 
-const cancelOrder = (id) => {
+const cancelOrder = (id, data) => {
   return new Promise(async (resolve, reject) => {
     try {
-      const order = await OrderModel.findByIdAndDelete(id);
-      if (order === null) {
+      let order = [];
+      const promises = data.map(async (order) => {
+        const productData = await ProductModel.findOneAndUpdate(
+          {
+            _id: order.product,
+            selled: { $gte: order.amount },
+          },
+          {
+            $inc: {
+              countInStock: +order.amount,
+              selled: -order.amount,
+            },
+          },
+          { new: true },
+        );
+
+        if (productData) {
+          order = await OrderModel.findByIdAndDelete(id);
+          if (order === null) {
+            resolve({
+              status: 'OK',
+              message: 'The Order is not defined',
+            });
+          }
+        } else {
+          return {
+            status: 'ERR',
+            message: 'Not enough product quality',
+            id: order.product,
+          };
+        }
+      });
+      const results = await Promise.all(promises);
+      const newData = results && results.filter((item) => item.id);
+      if (newData.length) {
         resolve({
-          status: 'OK',
-          message: 'The Order is not defined',
+          status: 'ERR',
+          message: `San pham voi id ${newData.join(', ')} khong ton tai`,
         });
       }
-
       resolve({
         status: 'OK',
-        message: 'Success',
+        message: 'Order canceled successfully',
         data: order,
       });
     } catch (err) {
