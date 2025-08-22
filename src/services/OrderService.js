@@ -1,5 +1,6 @@
 const OrderModel = require('../models/OrderProduct');
 const ProductModel = require('../models/ProductModel');
+const EmailService = require('./EmailService');
 
 const createOrder = (newOrder) => {
   return new Promise(async (resolve, reject) => {
@@ -16,6 +17,7 @@ const createOrder = (newOrder) => {
       isPaid,
       paidAt,
       user,
+      email,
     } = newOrder;
     try {
       const promises = orderItems.map(async (order) => {
@@ -72,11 +74,13 @@ const createOrder = (newOrder) => {
           message: `San pham voi id ${newData.join(', ')} khong du hang`,
         });
       }
+      await EmailService.sendEmailCreateOrder(email, orderItems);
       resolve({
         status: 'OK',
         message: 'Order created successfully',
       });
     } catch (err) {
+      console.log('Error creating order:', err);
       reject(err);
     }
   });
