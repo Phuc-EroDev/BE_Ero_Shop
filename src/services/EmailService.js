@@ -14,8 +14,14 @@ const sendEmailCreateOrder = async (email, orderItems) => {
   });
 
   let listItem = '';
+  const attachImage = [];
   orderItems.forEach((orderItem) => {
-    listItem += `<div><div><b>${orderItem.name}</b></div><div><img src="${orderItem.image}" alt="${orderItem.name}" /></div><div>Số lượng: <b>${orderItem.amount}</b>; Với giá: <b>${orderItem.price} VND</b></div></div>`;
+    listItem += `<div>
+      <div>Bạn đã đặt sản phẩm: ${orderItem.name}</div>
+      <div>Số lượng: <b>${orderItem.amount}</b>; Với giá: <b>${orderItem.price} VND</b></div>
+      <div>Bên dưới là hình ảnh sản phẩm: </div>
+    </div>`;
+    attachImage.push({ path: orderItem.image, filename: orderItem.name });
   });
 
   // Wrap in an async IIFE so we can use await.
@@ -27,6 +33,7 @@ const sendEmailCreateOrder = async (email, orderItems) => {
       subject: 'CẢM ƠN BẠN ĐÃ ĐẶT HÀNG TẠI ERO-SHOP',
       text: 'Bạn đã đặt hàng thành công tại Ero_Shop', // plain‑text body
       html: `<div><b>Bạn đã đặt hàng thành công tại Ero_Shop: </b></div> ${listItem}`, // HTML body
+      attachments: attachImage,
     });
   })();
 };
