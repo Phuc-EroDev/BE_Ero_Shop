@@ -24,7 +24,7 @@ const createOrder = async (req, res) => {
     const response = await OrderService.createOrder(req.body);
     return res.status(200).json(response);
   } catch (err) {
-    console.log(err);
+    // console.log(err);
     return res.status(500).json({ message: err });
   }
 };
@@ -62,8 +62,18 @@ const cancelOrder = async (req, res) => {
   }
 };
 
+const getAllOrder = async (req, res) => {
+  try {
+    const response = await OrderService.getAllOrder();
+    return res.status(200).json(response);
+  } catch (err) {
+    return res.status(500).json({ message: err });
+  }
+};
+
 module.exports = {
   createOrder,
   getOrderDetails,
   cancelOrder,
+  getAllOrder,
 };

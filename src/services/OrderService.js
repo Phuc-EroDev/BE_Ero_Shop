@@ -19,12 +19,68 @@ const createOrder = (newOrder) => {
       user,
       email,
     } = newOrder;
+
     try {
-      const promises = orderItems.map(async (order) => {
+      const stockCheckPromises = orderItems.map(async (order) => {
+        const productData = await ProductModel.findOne({
+          _id: order.product,
+          countInStock: { $gte: order.amount },
+        });
+
+        if (!productData) {
+          return {
+            status: 'ERR',
+            message: 'Not enough product quantity',
+            id: order.product,
+          };
+        }
+
+        return {
+          status: 'OK',
+          product: order.product,
+          amount: order.amount,
+        };
+      });
+
+      const stockResults = await Promise.all(stockCheckPromises);
+      const stockErrors = stockResults.filter((item) => item.status === 'ERR');
+
+      if (stockErrors.length) {
+        return resolve({
+          status: 'ERR',
+          message: `San pham voi id ${stockErrors.map((item) => item.id).join(', ')} khong du hang`,
+        });
+      }
+
+      const createdOrder = await OrderModel.create({
+        orderItems,
+        shippingAddress: {
+          fullName,
+          address,
+          city,
+          phone,
+        },
+        paymentMethod,
+        itemsPrice,
+        shippingPrice,
+        totalPrice,
+        isPaid,
+        paidAt,
+        user,
+      });
+
+      if (!createdOrder) {
+        return resolve({
+          status: 'ERR',
+          message: 'Failed to create order',
+        });
+      }
+
+      const updatePromises = orderItems.map(async (order) => {
         const productData = await ProductModel.findOneAndUpdate(
           {
             _id: order.product,
-            countInStock: { $gte: order.amount },
+            countInStock: { $gte: order.amount }, // Double check
           },
           {
             $inc: {
@@ -35,52 +91,44 @@ const createOrder = (newOrder) => {
           { new: true },
         );
 
-        if (productData) {
-          const createdOrder = await OrderModel.create({
-            orderItems,
-            shippingAddress: {
-              fullName,
-              address,
-              city,
-              phone,
-            },
-            paymentMethod,
-            itemsPrice,
-            shippingPrice,
-            totalPrice,
-            isPaid,
-            paidAt,
-            user,
-          });
-          if (createdOrder) {
-            return {
-              status: 'OK',
-              message: 'Order created successfully',
-            };
-          }
-        } else {
+        if (!productData) {
           return {
             status: 'ERR',
-            message: 'Not enough product quality',
+            message: 'Failed to update stock',
             id: order.product,
           };
         }
+
+        return {
+          status: 'OK',
+          product: order.product,
+        };
       });
-      const results = await Promise.all(promises);
-      const newData = results && results.filter((item) => item.id);
-      if (newData.length) {
-        resolve({
+
+      const updateResults = await Promise.all(updatePromises);
+      const updateErrors = updateResults.filter((item) => item.status === 'ERR');
+
+      if (updateErrors.length) {
+        await OrderModel.findByIdAndDelete(createdOrder._id);
+        return resolve({
           status: 'ERR',
-          message: `San pham voi id ${newData.join(', ')} khong du hang`,
+          message: `Failed to update stock for products: ${updateErrors.map((item) => item.id).join(', ')}`,
         });
       }
-      await EmailService.sendEmailCreateOrder(email, orderItems);
+
+      try {
+        await EmailService.sendEmailCreateOrder(email, orderItems);
+      } catch (emailError) {
+        // console.log('Email sending failed, but order created successfully:', emailError);
+      }
+
       resolve({
         status: 'OK',
         message: 'Order created successfully',
+        data: createdOrder,
       });
     } catch (err) {
-      console.log('Error creating order:', err);
+      // console.log('Error creating order:', err);
       reject(err);
     }
   });
@@ -164,8 +212,24 @@ const cancelOrder = (id, data) => {
   });
 };
 
+const getAllOrder = () => {
+  return new Promise(async (resolve, reject) => {
+    try {
+      const allOrder = await OrderModel.find();
+      resolve({
+        status: 'OK',
+        message: 'Success',
+        data: allOrder,
+      });
+    } catch (err) {
+      reject(err);
+    }
+  });
+};
+
 module.exports = {
   createOrder,
   getOrderDetails,
   cancelOrder,
+  getAllOrder,
 };
