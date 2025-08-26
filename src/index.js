@@ -1,4 +1,5 @@
 const express = require('express');
+const session = require('express-session');
 const dotenv = require('dotenv');
 const mongoose = require('mongoose');
 const routes = require('./routes');
@@ -17,6 +18,22 @@ app.use(
     credentials: true,
   }),
 );
+
+app.use(
+  session({
+    secret: 'your-secret',
+    resave: false,
+    saveUninitialized: false,
+    cookie: {
+      secure: false,
+      httpOnly: true,
+      maxAge: 1000 * 60 * 60 * 24,
+      sameSite: 'lax',
+    },
+    name: 'sessionId',
+  }),
+);
+
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ limit: '50mb' }));
 app.use(bodyParser.json());

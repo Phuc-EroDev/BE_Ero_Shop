@@ -1,9 +1,9 @@
 const express = require('express');
 const router = express.Router();
 const UserController = require('../controllers/UserController');
-const { authMiddleware, authUserMiddleware } = require('../middleware/authMiddleware');
+const { authMiddleware, authUserMiddleware, otpMiddleware } = require('../middleware/authMiddleware');
 
-router.post('/sign-up', UserController.createUser);
+router.post('/sign-up', otpMiddleware, UserController.createUser);
 router.post('/sign-in', UserController.loginUser);
 router.post('/log-out', UserController.logoutUser);
 router.put('/update-user/:id', authUserMiddleware, UserController.updateUser);
