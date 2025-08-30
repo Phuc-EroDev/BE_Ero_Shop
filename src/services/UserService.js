@@ -77,6 +77,47 @@ const loginUser = (userLogin) => {
   });
 };
 
+const resetPassword = (resetData) => {
+  return new Promise(async (resolve, reject) => {
+    const { email, newPassword } = resetData;
+    try {
+      const checkUser = await UserModel.findOne({
+        email: email,
+      });
+
+      if (checkUser === null) {
+        resolve({
+          status: 'ERR',
+          message: 'User not found',
+        });
+        return;
+      }
+
+      const hash = bcrypt.hashSync(newPassword, 10);
+      const updatedUser = await UserModel.findOneAndUpdate({ email: email }, { password: hash }, { new: true });
+
+      if (updatedUser) {
+        resolve({
+          status: 'OK',
+          message: 'Password reset successfully',
+          data: {
+            id: updatedUser._id,
+            email: updatedUser.email,
+            name: updatedUser.name,
+          },
+        });
+      } else {
+        resolve({
+          status: 'ERR',
+          message: 'Failed to reset password',
+        });
+      }
+    } catch (err) {
+      reject(err);
+    }
+  });
+};
+
 const updateUser = (id, data) => {
   return new Promise(async (resolve, reject) => {
     try {
@@ -182,6 +223,7 @@ const getDetailsUser = (id) => {
 module.exports = {
   createUser,
   loginUser,
+  resetPassword,
   updateUser,
   deleteUser,
   deleteManyUser,

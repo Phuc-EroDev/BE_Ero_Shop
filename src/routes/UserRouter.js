@@ -5,6 +5,7 @@ const { authMiddleware, authUserMiddleware, otpMiddleware } = require('../middle
 
 router.post('/sign-up', otpMiddleware, UserController.createUser);
 router.post('/sign-in', UserController.loginUser);
+router.post('/reset-password', otpMiddleware, UserController.resetPassword);
 router.post('/log-out', UserController.logoutUser);
 router.put('/update-user/:id', authUserMiddleware, UserController.updateUser);
 router.delete('/delete-user/:id', authMiddleware, UserController.deleteUser);

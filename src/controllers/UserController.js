@@ -61,6 +61,37 @@ const loginUser = async (req, res) => {
   }
 };
 
+const resetPassword = async (req, res) => {
+  try {
+    const { email, newPassword, confirmNewPassword } = req.body;
+    const reg =
+      /^(([^<>()[\]\.,;:\s@\"]+(\.[^<>()[\]\.,;:\s@\"]+)*)|(\".+\"))@(([^<>()[\]\.,;:\s@\"]+\.)+[^<>()[\]\.,;:\s@\"]{2,})$/i;
+    const isValidEmail = reg.test(email);
+
+    if (!email || !newPassword || !confirmNewPassword) {
+      return res.status(400).json({
+        status: 'ERR',
+        message: 'Please fill all the fields',
+      });
+    } else if (!isValidEmail) {
+      return res.status(400).json({
+        status: 'ERR',
+        message: 'Email is not valid',
+      });
+    } else if (newPassword !== confirmNewPassword) {
+      return res.status(400).json({
+        status: 'ERR',
+        message: 'Passwords do not match',
+      });
+    }
+
+    const data = await UserService.resetPassword(req.body);
+    return res.status(200).json(data);
+  } catch (err) {
+    return res.status(500).json({ message: err });
+  }
+};
+
 const logoutUser = async (req, res) => {
   try {
     res.clearCookie('refresh_token');
@@ -166,6 +197,7 @@ const refreshToken = async (req, res) => {
 module.exports = {
   createUser,
   loginUser,
+  resetPassword,
   logoutUser,
   updateUser,
   deleteUser,
