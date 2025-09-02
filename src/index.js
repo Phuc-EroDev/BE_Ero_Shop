@@ -14,7 +14,8 @@ const port = process.env.PORT || 3001;
 
 app.use(
   cors({
-    origin: 'https://fe-ero-shop-izd5p41db-erosennins-projects-0038b853.vercel.app/', // FE domain
+    // origin: 'https://fe-ero-shop-izd5p41db-erosennins-projects-0038b853.vercel.app/', // FE domain
+    origin: '*', // FE domain
     credentials: true,
   }),
 );
