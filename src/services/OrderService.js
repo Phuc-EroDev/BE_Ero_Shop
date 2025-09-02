@@ -11,6 +11,7 @@ const createOrder = (newOrder) => {
       city,
       phone,
       paymentMethod,
+      shippingMethod,
       itemsPrice,
       shippingPrice,
       totalPrice,
@@ -52,8 +53,14 @@ const createOrder = (newOrder) => {
         });
       }
 
+      // Transform orderItems để image thành string (lấy ảnh đầu tiên)
+      const transformedOrderItems = orderItems.map((item) => ({
+        ...item,
+        image: Array.isArray(item.image) ? item.image[0] : item.image,
+      }));
+
       const createdOrder = await OrderModel.create({
-        orderItems,
+        orderItems: transformedOrderItems,
         shippingAddress: {
           fullName,
           address,
@@ -61,6 +68,7 @@ const createOrder = (newOrder) => {
           phone,
         },
         paymentMethod,
+        shippingMethod,
         itemsPrice,
         shippingPrice,
         totalPrice,
@@ -134,7 +142,7 @@ const createOrder = (newOrder) => {
   });
 };
 
-const getOrderDetails = (id) => {
+const getAllOrdersByUser = (id) => {
   return new Promise(async (resolve, reject) => {
     try {
       const order = await OrderModel.find({
@@ -158,53 +166,112 @@ const getOrderDetails = (id) => {
   });
 };
 
-const cancelOrder = (id, data) => {
+const getOrderDetail = (id) => {
   return new Promise(async (resolve, reject) => {
     try {
-      let order = [];
-      const promises = data.map(async (order) => {
+      const order = await OrderModel.findById(id);
+      if (!order) {
+        resolve({
+          status: 'ERR',
+          message: 'The Order is not found',
+        });
+      }
+
+      resolve({
+        status: 'OK',
+        message: 'Success',
+        data: order,
+      });
+    } catch (err) {
+      reject(err);
+    }
+  });
+};
+
+const cancelOrder = (id, orderItems) => {
+  return new Promise(async (resolve, reject) => {
+    try {
+      const updatePromises = orderItems.map(async (item) => {
         const productData = await ProductModel.findOneAndUpdate(
           {
-            _id: order.product,
-            selled: { $gte: order.amount },
+            _id: item.product,
+            selled: { $gte: item.amount },
           },
           {
             $inc: {
-              countInStock: +order.amount,
-              selled: -order.amount,
+              countInStock: +item.amount,
+              selled: -item.amount,
             },
           },
           { new: true },
         );
 
-        if (productData) {
-          order = await OrderModel.findByIdAndDelete(id);
-          if (order === null) {
-            resolve({
-              status: 'OK',
-              message: 'The Order is not defined',
-            });
-          }
-        } else {
+        if (!productData) {
           return {
             status: 'ERR',
-            message: 'Not enough product quality',
-            id: order.product,
+            message: 'Not enough sold quantity to cancel',
+            productId: item.product,
           };
         }
+
+        return {
+          status: 'OK',
+          productId: item.product,
+        };
       });
-      const results = await Promise.all(promises);
-      const newData = results && results.filter((item) => item.id);
-      if (newData.length) {
-        resolve({
+
+      const updateResults = await Promise.all(updatePromises);
+      const updateErrors = updateResults.filter((item) => item.status === 'ERR');
+
+      if (updateErrors.length) {
+        return resolve({
           status: 'ERR',
-          message: `San pham voi id ${newData.join(', ')} khong ton tai`,
+          message: `Không thể hủy order. Sản phẩm với id ${updateErrors
+            .map((item) => item.productId)
+            .join(', ')} không đủ số lượng đã bán để hoàn lại`,
         });
       }
+
+      const deletedOrder = await OrderModel.findByIdAndDelete(id);
+
+      if (!deletedOrder) {
+        const rollbackPromises = orderItems.map(async (item) => {
+          await ProductModel.findOneAndUpdate(
+            { _id: item.product },
+            {
+              $inc: {
+                countInStock: -item.amount,
+                selled: +item.amount,
+              },
+            },
+          );
+        });
+        await Promise.all(rollbackPromises);
+
+        return resolve({
+          status: 'ERR',
+          message: 'Order không tồn tại',
+        });
+      }
+
       resolve({
         status: 'OK',
-        message: 'Order canceled successfully',
-        data: order,
+        message: 'Hủy order thành công',
+        data: deletedOrder,
+      });
+    } catch (err) {
+      reject(err);
+    }
+  });
+};
+
+const deleteManyOrder = (ids) => {
+  return new Promise(async (resolve, reject) => {
+    try {
+      await OrderModel.deleteMany({ _id: { $in: ids } });
+      resolve({
+        status: 'OK',
+        message: 'Delete many order Success',
       });
     } catch (err) {
       reject(err);
@@ -227,9 +294,73 @@ const getAllOrder = () => {
   });
 };
 
+const updateDeliveryStatus = (orderId) => {
+  return new Promise(async (resolve, reject) => {
+    try {
+      const updatedOrder = await OrderModel.findByIdAndUpdate(
+        orderId,
+        {
+          isDelivered: true,
+          deliveredAt: new Date(),
+        },
+        { new: true },
+      );
+
+      if (!updatedOrder) {
+        return resolve({
+          status: 'ERR',
+          message: 'Order không tồn tại',
+        });
+      }
+
+      resolve({
+        status: 'OK',
+        message: 'Cập nhật trạng thái giao hàng thành công',
+        data: updatedOrder,
+      });
+    } catch (err) {
+      reject(err);
+    }
+  });
+};
+
+const updatePaymentStatus = (orderId) => {
+  return new Promise(async (resolve, reject) => {
+    try {
+      const updatedOrder = await OrderModel.findByIdAndUpdate(
+        orderId,
+        {
+          isPaid: true,
+          paidAt: new Date(),
+        },
+        { new: true },
+      );
+
+      if (!updatedOrder) {
+        return resolve({
+          status: 'ERR',
+          message: 'Order không tồn tại',
+        });
+      }
+
+      resolve({
+        status: 'OK',
+        message: 'Cập nhật trạng thái thanh toán thành công',
+        data: updatedOrder,
+      });
+    } catch (err) {
+      reject(err);
+    }
+  });
+};
+
 module.exports = {
   createOrder,
-  getOrderDetails,
+  getAllOrdersByUser,
+  getOrderDetail,
   cancelOrder,
+  deleteManyOrder,
   getAllOrder,
+  updateDeliveryStatus,
+  updatePaymentStatus,
 };

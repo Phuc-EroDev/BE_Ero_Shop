@@ -49,6 +49,14 @@ const loginUser = async (req, res) => {
       });
     }
     const response = await UserService.loginUser(req.body);
+
+    if (response.status === 'ERR') {
+      return res.status(401).json({
+        status: 'ERR',
+        message: response.message,
+      });
+    }
+
     const { refresh_token, ...newResponse } = response;
     res.cookie('refresh_token', refresh_token, {
       httpOnly: true,

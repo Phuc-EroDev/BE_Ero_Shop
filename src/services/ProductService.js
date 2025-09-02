@@ -104,13 +104,21 @@ const getAllTypeProduct = () => {
 const getAllProduct = (limit = 12, page = 0, sort, filter) => {
   return new Promise(async (resolve, reject) => {
     try {
-      const totalProduct = await ProductModel.countDocuments();
+      let totalProduct;
+      let queryCondition = {};
+      
+      // Xây dựng điều kiện filter nếu có
+      if (filter) {
+        queryCondition[filter[0]] = { $regex: filter[1], $options: 'i' };
+      }
+      
+      // Đếm tổng số sản phẩm theo điều kiện filter
+      totalProduct = await ProductModel.countDocuments(queryCondition);
+      
       if (sort && filter) {
         const objectSort = {};
         objectSort[sort[1]] = sort[0];
-        const objectFilter = {};
-        objectFilter[filter[0]] = { $regex: filter[1], $options: 'i' };
-        const allProductSortFilter = await ProductModel.find(objectFilter)
+        const allProductSortFilter = await ProductModel.find(queryCondition)
           .limit(limit)
           .skip(page * limit)
           .sort(objectSort);
@@ -124,9 +132,7 @@ const getAllProduct = (limit = 12, page = 0, sort, filter) => {
         });
       }
       if (filter) {
-        const objectFilter = {};
-        objectFilter[filter[0]] = { $regex: filter[1], $options: 'i' };
-        const allProductFilter = await ProductModel.find(objectFilter)
+        const allProductFilter = await ProductModel.find(queryCondition)
           .limit(limit)
           .skip(page * limit);
         return resolve({

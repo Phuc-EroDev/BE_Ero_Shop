@@ -21,15 +21,14 @@ const sendEmailCreateOrder = async (email, orderItems) => {
       <div>Số lượng: <b>${orderItem.amount}</b>; Với giá: <b>${orderItem.price} VND</b></div>
       <div>Bên dưới là hình ảnh sản phẩm: </div>
     </div>`;
-    attachImage.push({ path: orderItem.image, filename: orderItem.name });
+    attachImage.push({ path: orderItem.image[0], filename: orderItem.name });
   });
 
   // Wrap in an async IIFE so we can use await.
   (async () => {
     const info = await transporter.sendMail({
       from: `"EroSennin" <${process.env.MAIL_ACCOUNT}>`,
-      //   to: email, // Use the email passed as an argument
-      to: 'dinhtam525126@gmail.com',
+      to: email,
       subject: 'CẢM ƠN BẠN ĐÃ ĐẶT HÀNG TẠI ERO-SHOP',
       text: 'Bạn đã đặt hàng thành công tại Ero_Shop', // plain‑text body
       html: `<div><b>Bạn đã đặt hàng thành công tại Ero_Shop: </b></div> ${listItem}`, // HTML body
