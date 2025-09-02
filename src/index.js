@@ -14,7 +14,7 @@ const port = process.env.PORT || 3001;
 
 app.use(
   cors({
-    origin: 'http://localhost:5173', // FE origin
+    origin: 'https://erosennin.id.vn/', // FE origin
     credentials: true,
   }),
 );

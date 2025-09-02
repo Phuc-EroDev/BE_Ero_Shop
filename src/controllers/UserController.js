@@ -63,7 +63,7 @@ const loginUser = async (req, res) => {
       secure: false,
       sameSite: 'strict',
     });
-    return res.status(200).json(newResponse);
+    return res.status(200).json({ ...newResponse, refresh_token });
   } catch (err) {
     return res.status(500).json({ message: err });
   }
@@ -188,7 +188,7 @@ const getDetailsUser = async (req, res) => {
 
 const refreshToken = async (req, res) => {
   try {
-    const token = req.cookies.refresh_token;
+    let token = req.headers.token.split(' ')[1];
     if (!token) {
       return res.status(400).json({
         status: 'Error',
