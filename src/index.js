@@ -14,7 +14,7 @@ const port = process.env.PORT || 3001;
 
 app.use(
   cors({
-    origin: 'https://erosennin.id.vn/', // FE origin
+    origin: 'https://erosennin.id.vn/', // FE domain
     credentials: true,
   }),
 );
