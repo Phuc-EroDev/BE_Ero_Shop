@@ -14,23 +14,23 @@ const port = process.env.PORT || 3001;
 
 app.use(
   cors({
-    // origin: 'https://erosennin.id.vn/', // FE domain
+    origin: 'https://erosennin.id.vn', // FE domain
     // origin: 'https://fe-ero-shop-izd5p41db-erosennins-projects-0038b853.vercel.app/', // FE domain
-    origin: '*', // FE domain
+    // origin: '*', // FE domain
     credentials: true,
   }),
 );
 
 app.use(
   session({
-    secret: 'your-secret',
+    secret: process.env.SESSION_SECRET || 'your-secret-key-here',
     resave: false,
     saveUninitialized: false,
     cookie: {
-      secure: false,
+      secure: process.env.NODE_ENV === 'production', // true khi production
       httpOnly: true,
-      maxAge: 1000 * 60 * 60 * 24,
-      sameSite: 'lax',
+      maxAge: 1000 * 60 * 60 * 24, // 24 hours
+      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax', // 'none' cho cross-origin
     },
     name: 'sessionId',
   }),
