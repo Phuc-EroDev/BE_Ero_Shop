@@ -106,15 +106,10 @@ const getAllProduct = (limit = 12, page = 0, sort, filter) => {
     try {
       let totalProduct;
       let queryCondition = {};
-      
-      // Xây dựng điều kiện filter nếu có
       if (filter) {
         queryCondition[filter[0]] = { $regex: filter[1], $options: 'i' };
       }
-      
-      // Đếm tổng số sản phẩm theo điều kiện filter
       totalProduct = await ProductModel.countDocuments(queryCondition);
-      
       if (sort && filter) {
         const objectSort = {};
         objectSort[sort[1]] = sort[0];
