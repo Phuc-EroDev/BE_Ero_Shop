@@ -8,7 +8,7 @@ const authMiddleware = (req, res, next) => {
     if (err) {
       return res.status(401).json({
         message: 'The Authentication',
-        status: 'Error',
+        status: 'ERR',
       });
     }
     if (user?.isAdmin) {
@@ -16,7 +16,7 @@ const authMiddleware = (req, res, next) => {
     } else {
       return res.status(403).json({
         message: 'The Authentication',
-        status: 'Error',
+        status: 'ERR',
       });
     }
   });
@@ -29,7 +29,7 @@ const authUserMiddleware = (req, res, next) => {
     if (err) {
       return res.status(401).json({
         message: 'The Authentication',
-        status: 'Error',
+        status: 'ERR',
       });
     }
     if (user?.isAdmin || user?.id === userId) {
@@ -37,7 +37,7 @@ const authUserMiddleware = (req, res, next) => {
     } else {
       return res.status(403).json({
         message: 'The Authentication',
-        status: 'Error',
+        status: 'ERR',
       });
     }
   });
@@ -50,7 +50,7 @@ const authUserOrderMiddleware = (req, res, next) => {
     if (err) {
       return res.status(401).json({
         message: 'The Authentication',
-        status: 'Error',
+        status: 'ERR',
       });
     }
     if (user?.isAdmin || user?.id === userId) {
@@ -58,7 +58,7 @@ const authUserOrderMiddleware = (req, res, next) => {
     } else {
       return res.status(403).json({
         message: 'The Authentication',
-        status: 'Error',
+        status: 'ERR',
       });
     }
   });
@@ -66,10 +66,19 @@ const authUserOrderMiddleware = (req, res, next) => {
 
 const otpMiddleware = (req, res, next) => {
   const { otp, email } = req.body;
+  const reg =
+    /^(([^<>()[\]\.,;:\s@\"]+(\.[^<>()[\]\.,;:\s@\"]+)*)|(\".+\"))@(([^<>()[\]\.,;:\s@\"]+\.)+[^<>()[\]\.,;:\s@\"]{2,})$/i;
+  const isValidEmail = reg.test(email);
+  if (!isValidEmail) {
+    return res.status(400).json({
+      message: 'Email is not valid',
+      status: 'ERR',
+    });
+  }
   if (!otp || !email) {
     return res.status(400).json({
       message: 'Missing OTP or email',
-      status: 'Error',
+      status: 'ERR',
     });
   }
   let existingIndex = 0;
@@ -84,7 +93,7 @@ const otpMiddleware = (req, res, next) => {
     if (err) {
       return res.status(401).json({
         message: 'The Authentication',
-        status: 'Error',
+        status: 'ERR',
       });
     }
     if (otpEmail?.email === email && otpEmail?.otp === otp) {
@@ -92,7 +101,7 @@ const otpMiddleware = (req, res, next) => {
     } else {
       return res.status(403).json({
         message: 'The OTP is invalid',
-        status: 'Error',
+        status: 'ERR',
       });
     }
   });

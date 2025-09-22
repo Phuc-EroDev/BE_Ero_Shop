@@ -56,7 +56,7 @@ const createOrder = (newOrder) => {
       // Transform orderItems để image thành string (lấy ảnh đầu tiên)
       const transformedOrderItems = orderItems.map((item) => ({
         ...item,
-        image: Array.isArray(item.image) ? item.image[0] : item.image,
+        image: Array.isArray(item.image) ? item.image[0].url : item.image,
       }));
 
       const createdOrder = await OrderModel.create({

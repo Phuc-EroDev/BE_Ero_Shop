@@ -21,7 +21,7 @@ const sendEmailCreateOrder = async (email, orderItems) => {
       <div>Số lượng: <b>${orderItem.amount}</b>; Với giá: <b>${orderItem.price} VND</b></div>
       <div>Bên dưới là hình ảnh sản phẩm: </div>
     </div>`;
-    attachImage.push({ path: orderItem.image[0], filename: orderItem.name });
+    attachImage.push({ path: orderItem.image[0].url, filename: orderItem.name });
   });
 
   // Wrap in an async IIFE so we can use await.

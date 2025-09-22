@@ -1,4 +1,5 @@
 const ProductModel = require('../models/ProductModel');
+const { uploadToCloudinary } = require('./CloudinaryService'); // Chỉ cần import hàm uploadToCloudinary
 
 const createProduct = (newProduct) => {
   return new Promise(async (resolve, reject) => {
@@ -12,10 +13,25 @@ const createProduct = (newProduct) => {
           status: 'ERR',
           message: 'The name of product is already',
         });
+        return;
+      }
+      let cloudinaryImages = [];
+      if (image && image.length > 0) {
+        try {
+          const uploadPromises = image.map(img => uploadToCloudinary(img));
+          cloudinaryImages = await Promise.all(uploadPromises);
+        } catch (uploadError) {
+          reject({
+            status: 'ERR',
+            message: 'Failed to upload images to Cloudinary',
+            error: uploadError.message
+          });
+          return;
+        }
       }
       const createdProduct = await ProductModel.create({
         name,
-        image,
+        image: cloudinaryImages,
         type,
         price,
         countInStock,
@@ -48,6 +64,26 @@ const updateProduct = (id, data) => {
           message: 'The Product is not found',
         });
         return;
+      }
+      if (data.image && data.image.length > 0) {
+        try {
+          const isBase64Images = data.image.some(img =>
+            typeof img === 'string' && (img.startsWith('data:image') || !img.startsWith('http'))
+          );
+
+          if (isBase64Images) {
+            const uploadPromises = data.image.map(img => uploadToCloudinary(img));
+            const cloudinaryImages = await Promise.all(uploadPromises);
+            data.image = cloudinaryImages;
+          }
+        } catch (uploadError) {
+          reject({
+            status: 'ERR',
+            message: 'Failed to upload images to Cloudinary',
+            error: uploadError.message
+          });
+          return;
+        }
       }
 
       const updatedProduct = await ProductModel.findByIdAndUpdate(id, data, { new: true });
@@ -106,15 +142,10 @@ const getAllProduct = (limit = 12, page = 0, sort, filter) => {
     try {
       let totalProduct;
       let queryCondition = {};
-      
-      // Xây dựng điều kiện filter nếu có
       if (filter) {
         queryCondition[filter[0]] = { $regex: filter[1], $options: 'i' };
       }
-      
-      // Đếm tổng số sản phẩm theo điều kiện filter
       totalProduct = await ProductModel.countDocuments(queryCondition);
-      
       if (sort && filter) {
         const objectSort = {};
         objectSort[sort[1]] = sort[0];
