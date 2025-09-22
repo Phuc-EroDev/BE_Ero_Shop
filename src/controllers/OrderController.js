@@ -19,7 +19,7 @@ const createOrder = async (req, res) => {
       totalPrice < 0
     ) {
       return res.status(400).json({
-        status: 'Error',
+        status: 'ERR',
         message: 'Please fill all the fields',
       });
     }
@@ -36,7 +36,7 @@ const getAllOrdersByUser = async (req, res) => {
     const userId = req.params.id;
     if (!userId) {
       return res.status(400).json({
-        status: 'Error',
+        status: 'ERR',
         message: 'The userId is required',
       });
     }
@@ -52,7 +52,7 @@ const getOrderDetail = async (req, res) => {
     const orderId = req.params.id;
     if (!orderId) {
       return res.status(400).json({
-        status: 'Error',
+        status: 'ERR',
         message: 'The orderId is required',
       });
     }
@@ -69,7 +69,7 @@ const cancelOrder = async (req, res) => {
     const data = req.body.orderItems;
     if (!orderId) {
       return res.status(400).json({
-        status: 'Error',
+        status: 'ERR',
         message: 'The orderId is required',
       });
     }
@@ -85,7 +85,7 @@ const deleteManyOrder = async (req, res) => {
     const data = req.body;
     if (!data?.ids) {
       return res.status(400).json({
-        status: 'Error',
+        status: 'ERR',
         message: 'The ids is required',
       });
     }
@@ -110,7 +110,7 @@ const updateDeliveryStatus = async (req, res) => {
     const orderId = req.params.id;
     if (!orderId) {
       return res.status(400).json({
-        status: 'Error',
+        status: 'ERR',
         message: 'The orderId is required',
       });
     }
@@ -126,7 +126,7 @@ const updatePaymentStatus = async (req, res) => {
     const orderId = req.params.id;
     if (!orderId) {
       return res.status(400).json({
-        status: 'Error',
+        status: 'ERR',
         message: 'The orderId is required',
       });
     }

@@ -5,7 +5,7 @@ const createProduct = async (req, res) => {
     const { name, image, type, price, countInStock, rating, discount, description } = req.body;
     if (!name || !image || !type || !price || !countInStock || !rating || !discount) {
       return res.status(400).json({
-        status: 'Error',
+        status: 'ERR',
         message: 'Please fill all the fields',
       });
     }
@@ -22,7 +22,7 @@ const updateProduct = async (req, res) => {
     const data = req.body;
     if (!productId) {
       return res.status(400).json({
-        status: 'Error',
+        status: 'ERR',
         message: 'The productId is required',
       });
     }
@@ -38,7 +38,7 @@ const getDetailsProduct = async (req, res) => {
     const productId = req.params.id;
     if (!productId) {
       return res.status(400).json({
-        status: 'Error',
+        status: 'ERR',
         message: 'The productId is required',
       });
     }
@@ -73,7 +73,7 @@ const deleteProduct = async (req, res) => {
     const productId = req.params.id;
     if (!productId) {
       return res.status(400).json({
-        status: 'Error',
+        status: 'ERR',
         message: 'The productId is required',
       });
     }
@@ -89,7 +89,7 @@ const deleteManyProduct = async (req, res) => {
     const data = req.body;
     if (!data?.ids) {
       return res.status(400).json({
-        status: 'Error',
+        status: 'ERR',
         message: 'The ids is required',
       });
     }
