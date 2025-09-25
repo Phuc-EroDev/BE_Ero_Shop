@@ -1,11 +1,13 @@
 const express = require('express');
 const session = require('express-session');
+const cors = require('cors');
 const dotenv = require('dotenv');
 const mongoose = require('mongoose');
 const routes = require('./routes');
-const cors = require('cors');
 const bodyParser = require('body-parser');
 const cookieParser = require('cookie-parser');
+const corsOptions = require('./configs/corsConfig');
+// const sessionConfig = require('./configs/sessionConfig');
 
 dotenv.config();
 
@@ -13,22 +15,20 @@ const app = express();
 const port = process.env.PORT || 3001;
 
 app.use(
-  cors({
-    origin: 'https://erosennin.id.vn', // FE origin
-    credentials: true,
-  }),
+  cors(corsOptions),
 );
+// sessionConfig(app);
 
 app.use(
   session({
-    secret: process.env.SESSION_SECRET || 'your-secret-key-here',
+    secret: process.env.SESSION_SECRET,
     resave: false,
     saveUninitialized: false,
     cookie: {
-      secure: process.env.NODE_ENV === 'production', // true khi production
+      secure: process.env.NODE_ENV === 'production',
       httpOnly: true,
-      maxAge: 1000 * 60 * 60 * 24, // 24 hours
-      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax', // 'none' cho cross-origin
+      maxAge: 1000 * 60 * 60 * 24,
+      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
     },
     name: 'sessionId',
   }),
